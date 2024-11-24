@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id            Int            @id @default(autoincrement())
+  username      String         @unique 
+  email         String         @unique
+  password      String
+  role          String
+  avatar        String?
+  comments      Comment[]
+  videos        Video[]
+  subscriptions Subscription[] @relation("UserSubscriptions")
+  subscribers   Subscription[] @relation("UserSubscribers")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Subscription {
+  id             Int      @id @default(autoincrement())
+  subscriber     User     @relation(name: "UserSubscriptions", fields: [subscriberId], references: [id])
+  subscriberId   Int
+  subscribedTo   User     @relation(name: "UserSubscribers", fields: [subscribedToId], references: [id])
+  subscribedToId Int
+  createdAt      DateTime @default(now())
+}
+
+model Test {
+  id Int @unique @id @default(autoincrement())
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  body      String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  video     Video    @relation(fields: [videoId], references: [id])
+  videoId   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Video {
+  id           Int       @id @default(autoincrement())
+  title        String
+  description  String? 
+  url          String
+  thumbnailUrl String
+  author       User      @relation(fields: [authorId], references: [id])
+  authorId     Int
+  comments     Comment[] 
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
